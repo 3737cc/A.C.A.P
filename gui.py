@@ -300,16 +300,19 @@ class ImageProcessingApp:
         tk.Label(frame, text="输出文件夹:").grid(row=2, column=0)
         tk.Entry(frame, textvariable=browse_output_button, state='readonly').grid(row=2, column=1)
         tk.Button(frame, text="浏览", command=lambda: browse_output_folder(browse_output_button)).grid(row=2, column=2)
-
-        execute_checkbox_var = tk.IntVar()  # 存储复选框状态的变量
-        tk.Checkbutton(frame, text="执行操作", variable=execute_checkbox_var).grid(row=3, column=1)
-
+        
         tk.Button(frame, text="一键出图",
-                  command=lambda: bayer_button(
-                      browse_button.get(),
-                      browse_output_button.get(),
-                      execute_checkbox_var.get()  # 将复选框状态传递给函数
-                  )).grid(row=4, column=1)
+                  command=lambda: bayer_button(browse_button.get(),browse_output_button.get(),)).grid(row=4, column=1)
+
+        # execute_checkbox_var = tk.IntVar()  # 存储复选框状态的变量
+        # tk.Checkbutton(frame, text="执行操作", variable=execute_checkbox_var).grid(row=3, column=1)
+        #
+        # tk.Button(frame, text="一键出图",
+        #           command=lambda: bayer_button(
+        #               browse_button.get(),
+        #               browse_output_button.get(),
+        #               execute_checkbox_var.get()  # 将复选框状态传递给函数
+        #           )).grid(row=4, column=1)
 
         # 添加返回按钮
         btn_back = tk.Button(frame, text="返回主页面", command=self.back_to_first_page)

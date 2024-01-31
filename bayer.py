@@ -32,8 +32,11 @@ def bayer_image(input_folder, output_folder, base_filename='Bayer'):
     # 读取FITS文件数据
     fits_data = read_fits(fits_file_path)
 
+    # 直方图均值拉伸
+    equalized_image = cv2.equalizeHist(fits_data.astype(np.uint8))
+
     # 应用拜尔序列
-    bayer_result = bayer_sequence(fits_data)
+    bayer_result = bayer_sequence(equalized_image)
 
     # 构造新的输出文件名
     existing_files = [file for file in os.listdir(output_folder) if file.startswith(base_filename)]
