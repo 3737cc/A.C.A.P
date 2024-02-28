@@ -4,7 +4,7 @@ import cv2
 from astropy.io import fits
 
 
-def align_and_save_all(target_filename, input_folder, save_folder):
+def align_all(target_filename, input_folder):
     # 读取目标图像
     target_data = fits.getdata(target_filename)
 
@@ -23,12 +23,25 @@ def align_and_save_all(target_filename, input_folder, save_folder):
             # 将对齐后的图像数据类型转换为与目标图像相同的数据类型
             aligned_data = aligned_data.astype(target_dtype)
 
-            # 构建保存路径
-            save_path = os.path.join(save_folder, f"aligned_{filename}")
+            yield aligned_data, filename
 
-            # 保存对齐后的图像
-            fits.writeto(save_path, aligned_data, overwrite=True)
-            print(f"Saved aligned image: {save_path}")
+
+def save_all(aligned_data, filename, save_folder):
+    # 构建保存路径
+    save_path = os.path.join(save_folder, f"aligned_{filename}")
+
+    # 保存对齐后的图像
+    fits.writeto(save_path, aligned_data, overwrite=True)
+    print(f"Saved aligned image: {save_path}")
+
+
+# # 调用示例
+# target_filename = "target.fits"
+# input_folder = "input_folder"
+# save_folder = "save_folder"
+#
+# for aligned_data, filename in align_all(target_filename, input_folder):
+#     save_all(aligned_data, filename, save_folder)
 
 
 def process_fits_images(target_filename, input_folder, save_folder):

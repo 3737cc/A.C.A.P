@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
-import BlackWhite
 import aligned
 import calibrate
 import fits_processor
@@ -29,49 +28,50 @@ def noise_image(input_folder_path, output_folder_path, method_combobox, kernel_s
 
 # 校准所需函数
 def calibrate_image(target_file_path, flat_files_path, dark_files_path, bias_files_path, output_folder_path):
-    calibrate.flat_calibration(target_file_path, flat_files_path, output_folder_path)
-    calibrate.dark_calibration(target_file_path, dark_files_path, output_folder_path)
-    calibrate.bias_calibration(target_file_path, bias_files_path, output_folder_path)
+    for calibrated_data, filename in calibrate.flat_calibration(target_file_path, flat_files_path):
+        calibrated_data = calibrate.dark_calibration(calibrated_data, dark_files_path)
+        calibrated_data = calibrate.bias_calibration(calibrated_data, bias_files_path)
+        calibrate.save_image(calibrated_data, filename, output_folder_path)
     messagebox.showinfo("一键校准完成", "图像已成功校准并保存！")
 
 
 def falt_calibrate_image(target_file_path, flat_files_path, output_folder_path):
-    calibrate.flat_calibration(target_file_path, flat_files_path, output_folder_path)
+    for calibrated_data, filename in calibrate.flat_calibration(flat_files_path, target_file_path):
+        calibrate.save_image(calibrated_data, filename, output_folder_path)
     messagebox.showinfo("平场校准完成", "图像已成功校准并保存！")
 
 
 def dark_calibrate_image(target_file_path, dark_files_path, output_folder_path):
-    calibrate.dark_calibration(target_file_path, dark_files_path, output_folder_path)
+    for calibrated_data, filename in calibrate.dark_calibration(dark_files_path, target_file_path):
+        calibrate.save_image(calibrated_data, filename, output_folder_path)
     messagebox.showinfo("暗场校准完成", "图像已成功校准并保存！")
 
 
 def bias_calibrate_image(target_file_path, bias_files_path, output_folder_path):
-    calibrate.bias_calibration(target_file_path, bias_files_path, output_folder_path)
+    for calibrated_data, filename in calibrate.bias_calibration(bias_files_path, target_file_path):
+        calibrate.save_image(calibrated_data, filename, output_folder_path)
     messagebox.showinfo("偏置场校准完成", "图像已成功校准并保存！")
 
 
 # 对齐所需函数
 def align_and_save(target_file_path, input_folder_path, output_folder_path):
-    aligned.align_and_save_all(target_file_path, input_folder_path, output_folder_path)
+    aligned.align_all(target_file_path, input_folder_path)
+    for aligned_data, filename in aligned.align_all(target_file_path, input_folder_path):
+        aligned.save_all(aligned_data, filename, output_folder_path)
     aligned.process_fits_images(target_file_path, output_folder_path, output_folder_path)
     messagebox.showinfo("对齐完成", "图像已成功对齐并保存！")
 
 
 # 叠加相关函数实现
-def stack_button(input_folder_path, output_folder_path, ):
-    meanstack.mean_stack(input_folder_path, output_folder_path)
+def stack_button(input_folder_path, output_folder_path):
+    stacked_data, header, data_type = meanstack.mean_stack(input_folder_path)
+    meanstack.save_fits(stacked_data, header, data_type, output_folder_path)
     messagebox.showinfo("堆叠完成", "图像已成功堆叠并保存！")
 
 
-# 进行解拜尔序列相关实现以及进行直方图拉伸
+# 进行解拜尔序列相关实现
 def bayer_button(input_folder_path, output_folder_path, ):
     bayer.bayer_image(input_folder_path, output_folder_path)
-    messagebox.showinfo("一键出图完成", "图像已成功保存")
-
-
-# 进行黑白图像相关处理
-def blackwhite_button(input_folder_path, output_folder_path, ):
-    BlackWhite.blackwhite_image(input_folder_path, output_folder_path)
     messagebox.showinfo("一键出图完成", "图像已成功保存")
 
 
@@ -116,7 +116,7 @@ class ImageProcessingApp:
         self.btn_goto_second_page = tk.Button(root, text="一键彩色出图", command=self.setup_bayer_page_wrapper)
         self.btn_goto_second_page.pack(side='top', padx=20, pady=20)
 
-        self.btn_goto_second_page = tk.Button(root, text="一键黑白出图", command=self.setup_blackwhite_page_wrapper)
+        self.btn_goto_second_page = tk.Button(root, text="一键黑白出图", command=self.setup_bayer_page_wrapper)
         self.btn_goto_second_page.pack(side='top', padx=20, pady=20)
 
     # 降噪ui界面相关实现
@@ -288,7 +288,6 @@ class ImageProcessingApp:
         btn_back = tk.Button(frame, text="返回主页面", command=self.back_to_first_page)
         btn_back.grid(row=6, column=1, pady=20)
 
-    # RGB图相关处理
     def setup_bayer_page_wrapper(self):
         # 销毁一级页面组件
         # self.destroy_current_page()
@@ -308,49 +307,9 @@ class ImageProcessingApp:
         tk.Label(frame, text="输出文件夹:").grid(row=2, column=0)
         tk.Entry(frame, textvariable=browse_output_button, state='readonly').grid(row=2, column=1)
         tk.Button(frame, text="浏览", command=lambda: browse_output_folder(browse_output_button)).grid(row=2, column=2)
-
+        
         tk.Button(frame, text="一键出图",
-                  command=lambda: bayer_button(browse_button.get(), browse_output_button.get(), )).grid(row=4, column=1)
-
-        # execute_checkbox_var = tk.IntVar()  # 存储复选框状态的变量
-        # tk.Checkbutton(frame, text="执行操作", variable=execute_checkbox_var).grid(row=3, column=1)
-        #
-        # tk.Button(frame, text="一键出图",
-        #           command=lambda: bayer_button(
-        #               browse_button.get(),
-        #               browse_output_button.get(),
-        #               execute_checkbox_var.get()  # 将复选框状态传递给函数
-        #           )).grid(row=4, column=1)
-
-        # 添加返回按钮
-        btn_back = tk.Button(frame, text="返回主页面", command=self.back_to_first_page)
-        btn_back.grid(row=6, column=1, pady=20)
-
-    # 黑白图相关处理
-
-    def setup_blackwhite_page_wrapper(self):
-        # 销毁一级页面组件
-        # self.destroy_current_page()
-        # 创建一个新的窗口作为二级页面
-        second_page_window = tk.Toplevel(self.root)
-        second_page_window.title("一键出图页面")
-        second_page_window.geometry("520x600+700+350")
-        self.setup_blackwhite_page(second_page_window)
-
-    def setup_blackwhite_page(self, frame):
-        browse_button = tk.StringVar()
-        tk.Label(frame, text="输入目标文件:").grid(row=1, column=0)
-        tk.Entry(frame, textvariable=browse_button, state='readonly').grid(row=1, column=1)
-        tk.Button(frame, text="浏览", command=lambda: browse_target_file(browse_button)).grid(row=1, column=2)
-
-        browse_output_button = tk.StringVar()
-        tk.Label(frame, text="输出文件夹:").grid(row=2, column=0)
-        tk.Entry(frame, textvariable=browse_output_button, state='readonly').grid(row=2, column=1)
-        tk.Button(frame, text="浏览", command=lambda: browse_output_folder(browse_output_button)).grid(row=2, column=2)
-
-        tk.Button(frame, text="一键出图",
-                  command=lambda: blackwhite_button(browse_button.get(), browse_output_button.get(), )).grid(row=4,
-                                                                                                             column=1)
+                  command=lambda: bayer_button(browse_button.get(),browse_output_button.get(),)).grid(row=4, column=1)
 
         # execute_checkbox_var = tk.IntVar()  # 存储复选框状态的变量
         # tk.Checkbutton(frame, text="执行操作", variable=execute_checkbox_var).grid(row=3, column=1)
@@ -395,5 +354,5 @@ class ImageProcessingApp:
         self.btn_goto_second_page = tk.Button(self.root, text="一键彩色出图", command=self.setup_bayer_page_wrapper)
         self.btn_goto_second_page.pack(side='top', padx=20, pady=20)
 
-        self.btn_goto_second_page = tk.Button(self.root, text="一键黑白出图", command=self.setup_blackwhite_page_wrapper)
+        self.btn_goto_second_page = tk.Button(self.root, text="一键黑白出图", command=self.setup_bayer_page_wrapper)
         self.btn_goto_second_page.pack(side='top', padx=20, pady=20)

@@ -2,7 +2,16 @@ from astropy.io import fits
 import os
 
 
-def flat_calibration(input_folder, target_filename, save_folder):
+def save_image(calibrated_data, filename, save_folder):
+    # 构建保存路径
+    save_path = os.path.join(save_folder, f"dark_{filename}")
+
+    # 保存对齐后的图像
+    fits.writeto(save_path, calibrated_data, overwrite=True)
+    print(f"Saved dark image: {save_path}")
+
+
+def flat_calibration(input_folder, target_filename):
     # 读取目标图像
     target_data = fits.getdata(target_filename)
 
@@ -29,15 +38,10 @@ def flat_calibration(input_folder, target_filename, save_folder):
             # 将校准后的图像数据类型转换为与目标图像相同的数据类型
             calibrated_data = calibrated_image.astype(current_dtype)
 
-            # 构建保存路径
-            save_path = os.path.join(save_folder, f"flat_{filename}")
-
-            # 保存校准后的图像
-            fits.writeto(save_path, calibrated_data, overwrite=True)
-            print(f"Saved flat image: {save_path}")
+            yield calibrated_data, filename
 
 
-def dark_calibration(input_folder, target_filename, save_folder):
+def dark_calibration(input_folder, target_filename):
     # 读取目标图像
     target_data = fits.getdata(target_filename)
 
@@ -57,15 +61,10 @@ def dark_calibration(input_folder, target_filename, save_folder):
             # 将对齐后的图像数据类型转换为与目标图像相同的数据类型
             calibrated_data = calibrated_image.astype(target_dtype)
 
-            # 构建保存路径
-            save_path = os.path.join(save_folder, f"dark_{filename}")
-
-            # 保存对齐后的图像
-            fits.writeto(save_path, calibrated_data, overwrite=True)
-            print(f"Saved dark image: {save_path}")
+            yield calibrated_data, filename
 
 
-def bias_calibration(input_folder, target_filename, save_folder):
+def bias_calibration(input_folder, target_filename):
     # 读取目标图像
     target_data = fits.getdata(target_filename)
 
@@ -85,9 +84,9 @@ def bias_calibration(input_folder, target_filename, save_folder):
             # 将对齐后的图像数据类型转换为与目标图像相同的数据类型
             calibrated_data = calibrated_image.astype(target_dtype)
 
-            # 构建保存路径
-            save_path = os.path.join(save_folder, f"bias{filename}")
+            yield calibrated_data, filename
 
-            # 保存对齐后的图像
-            fits.writeto(save_path, calibrated_data, overwrite=True)
-            print(f"Saved bias image: {save_path}")
+
+# # 使用示例
+# for calibrated_data, filename in dark_calibration(input_folder, target_filename, save_folder):
+#     save_dark_image(calibrated_data, filename, save_folder)
