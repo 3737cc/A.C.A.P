@@ -8,7 +8,19 @@ from bayer import read_fits, bayer_sequence, save_fits_rgb
 from calibrate import flat_calibration, bias_calibration, dark_calibration
 
 
-def color_image(input_folder, output_folder, flat_folder,dark_folder,bias_folder,target_folder, base_filename='ColorImage'):
+def color_image(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder, base_filename='ColorImage'):
+    # 读取校准图像
+    flat_image = flat_calibration(input_folder, flat_folder)
+    dark_image = dark_calibration(input_folder, dark_folder)
+    bias_image = bias_calibration(input_folder, bias_folder)
+
+    # 替换为你的目标图像路径
+    target_filename = target_folder
+    target_data = fits.getdata(target_filename)
+
+    # 初始化叠加图像
+    stacked_image = np.zeros_like(target_data)
+
     # 遍历文件夹内所有fits文件
     for filename in os.listdir(input_folder):
         if filename.endswith(".fits"):
@@ -19,19 +31,13 @@ def color_image(input_folder, output_folder, flat_folder,dark_folder,bias_folder
             denoise_image = cv2.bilateralFilter(fits_data.astype(np.float32), 9, 75, 75)
 
             # 校准
-            flat_image = flat_calibration(input_folder, flat_folder)
-            dark_image = dark_calibration(input_folder, dark_folder)
-            bias_image = bias_calibration(input_folder, bias_folder)
             calibrated_image = (denoise_image - dark_image) / (flat_image - bias_image)
 
             # 对齐
-            # 替换为你的目标图像路径
-            target_filename = target_folder
-            target_data = fits.getdata(target_filename)
             aligned_image, _ = register(calibrated_image, target_data)
 
             # 叠加
-            stacked_image = aligned_image
+            stacked_image += aligned_image
 
             # 解拜尔
             bayer_result = bayer_sequence(stacked_image)
@@ -50,3 +56,16 @@ def color_image(input_folder, output_folder, flat_folder,dark_folder,bias_folder
             # 保存图像
             save_fits_rgb(fits_rgb_data, save_path)
             print(f"Saved color image: {save_path}")
+
+
+# if __name__ == "__main__":
+#     # 设定参数
+#     input_folder = "/path/to/input/folder"
+#     output_folder = "/path/to/output/folder"
+#     flat_folder = "/path/to/flat/folder"
+#     dark_folder = "/path/to/dark/folder"
+#     bias_folder = "/path/to/bias/folder"
+#     target_folder = "/path/to/target/image.fits"
+#
+#     # 运行程序
+#     color_image(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder)
