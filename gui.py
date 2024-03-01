@@ -4,6 +4,7 @@ from tkinter import ttk, messagebox, filedialog
 import aligned
 import calibrate
 import fits_processor
+import linearity
 import meanstack
 import bayer
 
@@ -72,6 +73,13 @@ def stack_button(input_folder_path, output_folder_path):
 # 进行解拜尔序列相关实现
 def bayer_button(input_folder_path, output_folder_path, ):
     bayer.bayer_image(input_folder_path, output_folder_path)
+    messagebox.showinfo("一键出图完成", "图像已成功保存")
+
+
+# 自动一键式彩色出图
+def automatic_button(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder,
+                     base_filename='ColorImage'):
+    linearity.color_image(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder)
     messagebox.showinfo("一键出图完成", "图像已成功保存")
 
 
@@ -293,37 +301,50 @@ class ImageProcessingApp:
         # self.destroy_current_page()
         # 创建一个新的窗口作为二级页面
         second_page_window = tk.Toplevel(self.root)
-        second_page_window.title("一键出图页面")
+        second_page_window.title("一键出RGB图页面")
         second_page_window.geometry("520x600+700+350")
         self.setup_bayer_page(second_page_window)
 
     def setup_bayer_page(self, frame):
-        browse_button = tk.StringVar()
+        target_file_path = tk.StringVar()
         tk.Label(frame, text="输入目标文件:").grid(row=1, column=0)
-        tk.Entry(frame, textvariable=browse_button, state='readonly').grid(row=1, column=1)
+        tk.Entry(frame, textvariable=target_file_path, state='readonly').grid(row=1, column=1)
         tk.Button(frame, text="浏览", command=lambda: browse_target_file(browse_button)).grid(row=1, column=2)
 
-        browse_output_button = tk.StringVar()
-        tk.Label(frame, text="输出文件夹:").grid(row=2, column=0)
-        tk.Entry(frame, textvariable=browse_output_button, state='readonly').grid(row=2, column=1)
-        tk.Button(frame, text="浏览", command=lambda: browse_output_folder(browse_output_button)).grid(row=2, column=2)
-        
-        tk.Button(frame, text="一键出图",
-                  command=lambda: bayer_button(browse_button.get(),browse_output_button.get(),)).grid(row=4, column=1)
+        browse_button = tk.StringVar()
+        tk.Label(frame, text="输入文件夹:").grid(row=2, column=0)
+        tk.Entry(frame, textvariable=browse_button, state='readonly').grid(row=2, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_input_folder(browse_button)).grid(row=2, column=2)
 
-        # execute_checkbox_var = tk.IntVar()  # 存储复选框状态的变量
-        # tk.Checkbutton(frame, text="执行操作", variable=execute_checkbox_var).grid(row=3, column=1)
-        #
-        # tk.Button(frame, text="一键出图",
-        #           command=lambda: bayer_button(
-        #               browse_button.get(),
-        #               browse_output_button.get(),
-        #               execute_checkbox_var.get()  # 将复选框状态传递给函数
-        #           )).grid(row=4, column=1)
+        browse_output_button = tk.StringVar()
+        tk.Label(frame, text="输出文件夹:").grid(row=3, column=0)
+        tk.Entry(frame, textvariable=browse_output_button, state='readonly').grid(row=3, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_output_folder(browse_output_button)).grid(row=3, column=2)
+
+        tk.Label(frame, text="选择平场FITS文件:").grid(row=4, column=0)
+        falt_file_path = tk.StringVar()
+        tk.Entry(frame, textvariable=falt_file_path, state='readonly').grid(row=4, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_target_file(falt_file_path)).grid(row=4, column=2)
+
+        tk.Label(frame, text="选择暗场FITS文件:").grid(row=5, column=0)
+        dark_file_path = tk.StringVar()
+        tk.Entry(frame, textvariable=dark_file_path, state='readonly').grid(row=5, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_target_file(dark_file_path)).grid(row=5, column=2)
+
+        tk.Label(frame, text="选择偏置场FITS文件:").grid(row=6, column=0)
+        bias_file_path = tk.StringVar()
+        tk.Entry(frame, textvariable=bias_file_path, state='readonly').grid(row=6, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_target_file(bias_file_path)).grid(row=6, column=2)
+
+        tk.Button(frame, text="一键出图",
+                  command=lambda: automatic_button(browse_button.get(), browse_output_button.get(),
+                                                   falt_file_path.get(),
+                                                   dark_file_path.get(), bias_file_path.get(),
+                                                   target_file_path.get())).grid(row=7, column=1)
 
         # 添加返回按钮
         btn_back = tk.Button(frame, text="返回主页面", command=self.back_to_first_page)
-        btn_back.grid(row=6, column=1, pady=20)
+        btn_back.grid(row=8, column=1, pady=20)
 
     # 销毁当前页面
     def destroy_current_page(self):
