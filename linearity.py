@@ -7,9 +7,10 @@ from calibrate import dark_calibration, bias_calibration
 from fits_processor import apply_bilateral_filter
 
 
-def color_image(input_folder, output_folder, flat_folder, dark_fits, bias_fits, target_fits,
-                base_filename='ColorImage'):
+def color_image(input_folder, output_folder, flat_folder, dark_fits, bias_fits, target_fits
+                ):
     global img
+    base_filename = 'ColorImage'
     fits_files = [os.path.join(input_folder, file) for file in os.listdir(input_folder) if file.endswith('.fits')]
 
     if not fits_files:
@@ -32,18 +33,23 @@ def color_image(input_folder, output_folder, flat_folder, dark_fits, bias_fits, 
             fits_data = read_fits(os.path.join(input_folder, filename))
             # 双边降噪图像
             bilateral_data = apply_bilateral_filter(fits_data)
-            # 平常校准
-            # 暗场校准
-            dark_data = dark_calibration(bilateral_data, dark_fits)
-            # 偏置场校准
-            bias_data = bias_calibration(dark_data, bias_fits)
             # 对齐图像
-            aligned_data, _ = aa.register(bias_data, target_data)
+            aligned_data, _ = aa.register(bilateral_data, target_data)
             # 将对齐后的图像数据类型转换为与目标图像相同的数据类型
             aligned_data = aligned_data.astype(target_dtype)
-
+            # 平常校准
+            # 暗场校准
+            dark_image = aligned_data - target_data
+            dark_image[dark_image < 0] = 0  # 确保不会出现负值
+            # 将对齐后的图像数据类型转换为与目标图像相同的数据类型
+            dark_data = dark_image.astype(target_dtype)
+            # 偏置场校准
+            bias_image = dark_data - target_data
+            bias_image[bias_image < 0] = 0  # 确保不会出现负值
+            # 将校准后的图像数据类型转换为与目标图像相同的数据类型
+            bias_data = bias_image.astype(target_dtype)
             # 将对齐后的图像添加到列表中
-            stacked_data_list.append(aligned_data)
+            stacked_data_list.append(bias_data)
 
     stacked_data = np.sum(stacked_data_list, axis=0) / len(fits_files)
 
@@ -73,9 +79,9 @@ if __name__ == "__main__":
     # 设定参数
     input_folder = "E:/Image/QHY5III715C/19_22_21"
     output_folder = "E:/Image/QHY5III715C/1"
-    flat_folder = "E:/Image/QHY5III715C/dark/dark.fits"
-    dark_folder = "E:/Image/QHY5III715C/dark/dark.fits"
-    bias_folder = "E:/Image/QHY5III715C/dark/dark.fits"
+    flat_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00001.fits"
+    dark_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00002.fits"
+    bias_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00003.fits"
     target_folder = "E:/Image/QHY5III715C/cope.fits"
 
     # 运行程序

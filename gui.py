@@ -77,8 +77,8 @@ def bayer_button(input_folder_path, output_folder_path, ):
 
 
 # 自动一键式彩色出图
-def automatic_button(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder,
-                     base_filename='ColorImage'):
+
+def automatic_button(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder):
     linearity.color_image(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder)
     messagebox.showinfo("一键出图完成", "图像已成功保存")
 
@@ -309,7 +309,7 @@ class ImageProcessingApp:
         target_file_path = tk.StringVar()
         tk.Label(frame, text="输入目标文件:").grid(row=1, column=0)
         tk.Entry(frame, textvariable=target_file_path, state='readonly').grid(row=1, column=1)
-        tk.Button(frame, text="浏览", command=lambda: browse_target_file(browse_button)).grid(row=1, column=2)
+        tk.Button(frame, text="浏览", command=lambda: browse_target_file(target_file_path)).grid(row=1, column=2)
 
         browse_button = tk.StringVar()
         tk.Label(frame, text="输入文件夹:").grid(row=2, column=0)
@@ -340,7 +340,7 @@ class ImageProcessingApp:
                   command=lambda: automatic_button(browse_button.get(), browse_output_button.get(),
                                                    falt_file_path.get(),
                                                    dark_file_path.get(), bias_file_path.get(),
-                                                   target_file_path.get())).grid(row=7, column=1)
+                                                   target_file_path.get(),)).grid(row=7, column=1)
 
         # 添加返回按钮
         btn_back = tk.Button(frame, text="返回主页面", command=self.back_to_first_page)
