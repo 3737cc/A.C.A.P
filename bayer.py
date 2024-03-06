@@ -44,10 +44,19 @@ def bayer_image(input_folder, output_folder, base_filename='Bayer'):
     output_filename = f'{base_filename}_{num_existing_files + 1}.fits'
     # 替换为你想保存的文件路径及文件名
     save_fits_path = os.path.join(output_folder, output_filename)
-
     # 将RGB图像数据转换为FITS所需的格式
     fits_rgb_data = np.transpose(bayer_result, (2, 0, 1))
+    return fits_rgb_data, save_fits_path
 
-    # 保存FITS文件
-    save_fits_rgb(fits_rgb_data, save_fits_path)
-    print(f"Saved Bayer sequence result as FITS with RGB channels to {save_fits_path}")
+
+# if __name__ == '__main__':
+#
+#     input_folder = "E:/Image/QHY5III715C/aligned/aligned_Capture_00009.fits"
+#     output_folder = "E:/Image/QHY5III715C/4"
+#
+#     bayer_result, save_fits_path = bayer_image(input_folder, output_folder)
+#
+#     # 调用保存函数
+#     save_fits_rgb(bayer_result, save_fits_path)
+#
+#     print(f"Saved Bayer sequence result as FITS with RGB channels to {save_fits_path}")

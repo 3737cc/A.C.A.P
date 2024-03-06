@@ -36,7 +36,7 @@ def calibrate_image(target_file_path, flat_files_path, dark_files_path, bias_fil
     messagebox.showinfo("一键校准完成", "图像已成功校准并保存！")
 
 
-def falt_calibrate_image(target_file_path, flat_files_path, output_folder_path):
+def flat_calibrate_image(target_file_path, flat_files_path, output_folder_path):
     for calibrated_data, filename in calibrate.flat_calibration(flat_files_path, target_file_path):
         calibrate.save_image(calibrated_data, filename, output_folder_path)
     messagebox.showinfo("平场校准完成", "图像已成功校准并保存！")
@@ -78,9 +78,16 @@ def bayer_button(input_folder_path, output_folder_path, ):
 
 # 自动一键式彩色出图
 
-def automatic_button(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder):
-    linearity.color_image(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder)
-    messagebox.showinfo("一键出图完成", "图像已成功保存")
+def automatic_color_button(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder):
+    color.color_image(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder)
+    messagebox.showinfo("一键彩色出图完成", "图像已成功保存")
+
+
+# 自动一键式黑白出图
+
+def automatic_black_button(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder):
+    color.color_image(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder)
+    messagebox.showinfo("一键黑白出图完成", "图像已成功保存")
 
 
 # 读取，打开，保存fits文件
@@ -121,10 +128,10 @@ class ImageProcessingApp:
         self.btn_goto_second_page = tk.Button(root, text="叠加功能", command=self.setup_meanstck_page_wrapper)
         self.btn_goto_second_page.pack(side='left', padx=20, pady=20)
 
-        self.btn_goto_second_page = tk.Button(root, text="一键彩色出图", command=self.setup_bayer_page_wrapper)
+        self.btn_goto_second_page = tk.Button(root, text="一键彩色出图", command=self.setup_bayer_page_wrapper_color)
         self.btn_goto_second_page.pack(side='top', padx=20, pady=20)
 
-        self.btn_goto_second_page = tk.Button(root, text="一键黑白出图", command=self.setup_bayer_page_wrapper)
+        self.btn_goto_second_page = tk.Button(root, text="一键黑白出图", command=self.setup_bayer_page_wrapper_black)
         self.btn_goto_second_page.pack(side='top', padx=20, pady=20)
 
     # 降噪ui界面相关实现
@@ -217,7 +224,7 @@ class ImageProcessingApp:
                                                   output_folder_path.get())).grid(row=5, column=1)
 
         tk.Button(frame, text="平场校准并保存",
-                  command=lambda: falt_calibrate_image(input_folder_path.get(), falt_file_path.get(),
+                  command=lambda: flat_calibrate_image(input_folder_path.get(), falt_file_path.get(),
                                                        output_folder_path.get())).grid(row=0, column=4)
 
         tk.Button(frame, text="暗场校准并保存",
@@ -296,16 +303,16 @@ class ImageProcessingApp:
         btn_back = tk.Button(frame, text="返回主页面", command=self.back_to_first_page)
         btn_back.grid(row=6, column=1, pady=20)
 
-    def setup_bayer_page_wrapper(self):
+    def setup_bayer_page_wrapper_color(self):
         # 销毁一级页面组件
         # self.destroy_current_page()
         # 创建一个新的窗口作为二级页面
         second_page_window = tk.Toplevel(self.root)
         second_page_window.title("一键出RGB图页面")
         second_page_window.geometry("520x600+700+350")
-        self.setup_bayer_page(second_page_window)
+        self.setup_bayer_page_color(second_page_window)
 
-    def setup_bayer_page(self, frame):
+    def setup_bayer_page_color(self, frame):
         target_file_path = tk.StringVar()
         tk.Label(frame, text="输入目标文件:").grid(row=1, column=0)
         tk.Entry(frame, textvariable=target_file_path, state='readonly').grid(row=1, column=1)
@@ -337,10 +344,60 @@ class ImageProcessingApp:
         tk.Button(frame, text="浏览", command=lambda: browse_target_file(bias_file_path)).grid(row=6, column=2)
 
         tk.Button(frame, text="一键出图",
-                  command=lambda: automatic_button(browse_button.get(), browse_output_button.get(),
-                                                   falt_file_path.get(),
-                                                   dark_file_path.get(), bias_file_path.get(),
-                                                   target_file_path.get(),)).grid(row=7, column=1)
+                  command=lambda: automatic_color_button(browse_button.get(), browse_output_button.get(),
+                                                         falt_file_path.get(),
+                                                         dark_file_path.get(), bias_file_path.get(),
+                                                         target_file_path.get(), )).grid(row=7, column=1)
+
+        # 添加返回按钮
+        btn_back = tk.Button(frame, text="返回主页面", command=self.back_to_first_page)
+        btn_back.grid(row=8, column=1, pady=20)
+
+    def setup_bayer_page_wrapper_black(self):
+        # 销毁一级页面组件
+        # self.destroy_current_page()
+        # 创建一个新的窗口作为二级页面
+        second_page_window = tk.Toplevel(self.root)
+        second_page_window.title("一键出黑白图页面")
+        second_page_window.geometry("520x600+700+350")
+        self.setup_bayer_page_black(second_page_window)
+
+    def setup_bayer_page_black(self, frame):
+        target_file_path = tk.StringVar()
+        tk.Label(frame, text="输入目标文件:").grid(row=1, column=0)
+        tk.Entry(frame, textvariable=target_file_path, state='readonly').grid(row=1, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_target_file(target_file_path)).grid(row=1, column=2)
+
+        browse_button = tk.StringVar()
+        tk.Label(frame, text="输入文件夹:").grid(row=2, column=0)
+        tk.Entry(frame, textvariable=browse_button, state='readonly').grid(row=2, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_input_folder(browse_button)).grid(row=2, column=2)
+
+        browse_output_button = tk.StringVar()
+        tk.Label(frame, text="输出文件夹:").grid(row=3, column=0)
+        tk.Entry(frame, textvariable=browse_output_button, state='readonly').grid(row=3, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_output_folder(browse_output_button)).grid(row=3, column=2)
+
+        tk.Label(frame, text="选择平场FITS文件:").grid(row=4, column=0)
+        falt_file_path = tk.StringVar()
+        tk.Entry(frame, textvariable=falt_file_path, state='readonly').grid(row=4, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_target_file(falt_file_path)).grid(row=4, column=2)
+
+        tk.Label(frame, text="选择暗场FITS文件:").grid(row=5, column=0)
+        dark_file_path = tk.StringVar()
+        tk.Entry(frame, textvariable=dark_file_path, state='readonly').grid(row=5, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_target_file(dark_file_path)).grid(row=5, column=2)
+
+        tk.Label(frame, text="选择偏置场FITS文件:").grid(row=6, column=0)
+        bias_file_path = tk.StringVar()
+        tk.Entry(frame, textvariable=bias_file_path, state='readonly').grid(row=6, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_target_file(bias_file_path)).grid(row=6, column=2)
+
+        tk.Button(frame, text="一键出图",
+                  command=lambda: automatic_black_button(browse_button.get(), browse_output_button.get(),
+                                                         falt_file_path.get(),
+                                                         dark_file_path.get(), bias_file_path.get(),
+                                                         target_file_path.get(), )).grid(row=7, column=1)
 
         # 添加返回按钮
         btn_back = tk.Button(frame, text="返回主页面", command=self.back_to_first_page)
@@ -372,8 +429,8 @@ class ImageProcessingApp:
         self.btn_goto_second_page = tk.Button(self.root, text="叠加功能", command=self.setup_meanstck_page_wrapper)
         self.btn_goto_second_page.pack(side='left', padx=20, pady=60)
 
-        self.btn_goto_second_page = tk.Button(self.root, text="一键彩色出图", command=self.setup_bayer_page_wrapper)
+        self.btn_goto_second_page = tk.Button(self.root, text="一键彩色出图", command=self.setup_bayer_page_wrapper_color)
         self.btn_goto_second_page.pack(side='top', padx=20, pady=20)
 
-        self.btn_goto_second_page = tk.Button(self.root, text="一键黑白出图", command=self.setup_bayer_page_wrapper)
+        self.btn_goto_second_page = tk.Button(self.root, text="一键黑白出图", command=self.setup_bayer_page_wrapper_black)
         self.btn_goto_second_page.pack(side='top', padx=20, pady=20)

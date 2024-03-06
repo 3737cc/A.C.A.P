@@ -31,7 +31,7 @@ def mean_stack(input_folder):
         stacked_data_list = list(executor.map(mean_stack_worker, tasks))
 
     # 将加载的数据堆叠并计算均值
-    stacked_data = np.sum(stacked_data_list, axis=0) /  len(fits_files)
+    stacked_data = np.sum(stacked_data_list, axis=0) / len(fits_files)
 
     return stacked_data, header, data_type
 

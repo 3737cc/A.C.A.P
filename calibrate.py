@@ -54,11 +54,11 @@ def dark_calibration(input_folder, target_filename):
             # 加载当前文件
             current_data = fits.getdata(os.path.join(input_folder, filename))
 
-            # 执行平场校准
+            # 执行暗场校准
             calibrated_image = current_data - target_data
             calibrated_image[calibrated_image < 0] = 0  # 确保不会出现负值
 
-            # 将对齐后的图像数据类型转换为与目标图像相同的数据类型
+            # 将校准后的图像数据类型转换为与目标图像相同的数据类型
             calibrated_data = calibrated_image.astype(target_dtype)
 
             yield calibrated_data, filename
@@ -77,11 +77,11 @@ def bias_calibration(input_folder, target_filename):
             # 加载当前文件
             current_data = fits.getdata(os.path.join(input_folder, filename))
 
-            # 执行平场校准
+            # 执行偏置场校准
             calibrated_image = current_data - target_data
             calibrated_image[calibrated_image < 0] = 0  # 确保不会出现负值
 
-            # 将对齐后的图像数据类型转换为与目标图像相同的数据类型
+            # 将校准后的图像数据类型转换为与目标图像相同的数据类型
             calibrated_data = calibrated_image.astype(target_dtype)
 
             yield calibrated_data, filename
