@@ -4,7 +4,7 @@ from tkinter import ttk, messagebox, filedialog
 import aligned
 import calibrate
 import fits_processor
-import linearity
+import color
 import meanstack
 import bayer
 
