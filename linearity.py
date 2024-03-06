@@ -3,10 +3,11 @@ import numpy as np
 from astropy.io import fits
 import astroalign as aa
 from bayer import read_fits, bayer_sequence, save_fits_rgb
+from calibrate import dark_calibration, bias_calibration
 from fits_processor import apply_bilateral_filter
 
 
-def color_image(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder,
+def color_image(input_folder, output_folder, flat_folder, dark_fits, bias_fits, target_fits,
                 base_filename='ColorImage'):
     global img
     fits_files = [os.path.join(input_folder, file) for file in os.listdir(input_folder) if file.endswith('.fits')]
@@ -16,7 +17,7 @@ def color_image(input_folder, output_folder, flat_folder, dark_folder, bias_fold
         return
 
     # 读取目标图像
-    target_data = fits.getdata(target_folder)
+    target_data = fits.getdata(target_fits)
 
     # 获取目标图像的数据类型
     target_dtype = target_data.dtype
@@ -31,9 +32,13 @@ def color_image(input_folder, output_folder, flat_folder, dark_folder, bias_fold
             fits_data = read_fits(os.path.join(input_folder, filename))
             # 双边降噪图像
             bilateral_data = apply_bilateral_filter(fits_data)
+            # 平常校准
+            # 暗场校准
+            dark_data = dark_calibration(bilateral_data, dark_fits)
+            # 偏置场校准
+            bias_data = bias_calibration(dark_data, bias_fits)
             # 对齐图像
-            aligned_data, _ = aa.register(bilateral_data, target_data)
-
+            aligned_data, _ = aa.register(bias_data, target_data)
             # 将对齐后的图像数据类型转换为与目标图像相同的数据类型
             aligned_data = aligned_data.astype(target_dtype)
 
@@ -68,9 +73,9 @@ if __name__ == "__main__":
     # 设定参数
     input_folder = "E:/Image/QHY5III715C/19_22_21"
     output_folder = "E:/Image/QHY5III715C/1"
-    flat_folder = "E:/Image/QHY5III715C/dark"
-    dark_folder = "E:/Image/QHY5III715C/dark"
-    bias_folder = "E:/Image/QHY5III715C/dark"
+    flat_folder = "E:/Image/QHY5III715C/dark/dark.fits"
+    dark_folder = "E:/Image/QHY5III715C/dark/dark.fits"
+    bias_folder = "E:/Image/QHY5III715C/dark/dark.fits"
     target_folder = "E:/Image/QHY5III715C/cope.fits"
 
     # 运行程序
