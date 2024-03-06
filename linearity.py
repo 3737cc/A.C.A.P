@@ -1,9 +1,10 @@
 import os
+
+import astroalign as aa
 import numpy as np
 from astropy.io import fits
-import astroalign as aa
+
 from bayer import read_fits, bayer_sequence, save_fits_rgb
-from calibrate import dark_calibration, bias_calibration
 from fits_processor import apply_bilateral_filter
 
 
@@ -41,13 +42,14 @@ def color_image(input_folder, output_folder, flat_folder, dark_fits, bias_fits, 
             # 暗场校准
             dark_image = aligned_data - target_data
             dark_image[dark_image < 0] = 0  # 确保不会出现负值
-            # 将对齐后的图像数据类型转换为与目标图像相同的数据类型
+            # 将校准后的图像数据类型转换为与目标图像相同的数据类型
             dark_data = dark_image.astype(target_dtype)
             # 偏置场校准
             bias_image = dark_data - target_data
             bias_image[bias_image < 0] = 0  # 确保不会出现负值
             # 将校准后的图像数据类型转换为与目标图像相同的数据类型
             bias_data = bias_image.astype(target_dtype)
+
             # 将对齐后的图像添加到列表中
             stacked_data_list.append(bias_data)
 
@@ -75,14 +77,15 @@ def color_image(input_folder, output_folder, flat_folder, dark_fits, bias_fits, 
     print(f"Saved color image: {save_path}")
 
 
-if __name__ == "__main__":
-    # 设定参数
-    input_folder = "E:/Image/QHY5III715C/19_22_21"
-    output_folder = "E:/Image/QHY5III715C/1"
-    flat_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00001.fits"
-    dark_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00002.fits"
-    bias_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00003.fits"
-    target_folder = "E:/Image/QHY5III715C/cope.fits"
-
-    # 运行程序
-    color_image(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder)
+# 测试代码
+# if __name__ == "__main__":
+#     # 设定参数
+#     input_folder = "E:/Image/QHY5III715C/19_22_21"
+#     output_folder = "E:/Image/QHY5III715C/1"
+#     flat_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00001.fits"
+#     dark_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00002.fits"
+#     bias_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00003.fits"
+#     target_folder = "E:/Image/QHY5III715C/cope.fits"
+#
+#     # 运行程序
+#     color_image(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder)
