@@ -78,14 +78,14 @@ def color_image(input_folder, output_folder, flat_folder, dark_fits, bias_fits, 
     print(f"Saved black image: {save_path}")
 
 
-if __name__ == "__main__":
-    # 设定参数
-    input_folder = "E:/Image/QHY5III715C/19_22_21"
-    output_folder = "E:/Image/QHY5III715C/3"
-    flat_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00001.fits"
-    dark_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00002.fits"
-    bias_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00003.fits"
-    target_folder = "E:/Image/QHY5III715C/Capture_00016.fits"
-
-    # 运行程序
-    color_image(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder)
+# if __name__ == "__main__":
+#     # 设定参数
+#     input_folder = "E:/Image/QHY5III715C/19_22_21"
+#     output_folder = "E:/Image/QHY5III715C/3"
+#     flat_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00001.fits"
+#     dark_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00002.fits"
+#     bias_folder = "E:/Image/QHY5III715C/19_24_15/Capture_00003.fits"
+#     target_folder = "E:/Image/QHY5III715C/Capture_00016.fits"
+#
+#     # 运行程序
+#     color_image(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder)
