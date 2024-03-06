@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 from astropy.io import fits
 
-from bayer import read_fits, bayer_sequence, save_fits_rgb, bayer_image
+from bayer import read_fits, bayer_sequence, save_fits_rgb
 from fits_processor import apply_bilateral_filter
 
 
