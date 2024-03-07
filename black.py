@@ -5,13 +5,14 @@ import cv2
 import numpy as np
 from astropy.io import fits
 
+import calibrate
 from bayer import read_fits, bayer_sequence, save_fits_rgb
 from fits_processor import apply_bilateral_filter
 
 
-def color_image(input_folder, output_folder, flat_folder, dark_fits, bias_fits, target_fits
+def color_image(input_folder, output_folder, flat_fits, dark_fits, bias_fits, target_fits
                 ):
-    global img
+    global img, calibrated_image
     base_filename = 'BlackImage'
     fits_files = [os.path.join(input_folder, file) for file in os.listdir(input_folder) if file.endswith('.fits')]
 
@@ -39,22 +40,14 @@ def color_image(input_folder, output_folder, flat_folder, dark_fits, bias_fits, 
             aligned_data, _ = aa.register(bilateral_data, target_data)
             # 将对齐后的图像数据类型转换为与目标图像相同的数据类型
             aligned_data = aligned_data.astype(target_dtype)
-            # 平常校准
-            # # 暗场校准
-            # dark_image = aligned_data - target_data
-            # dark_image[dark_image < 0] = 0  # 确保不会出现负值
-            # # 将校准后的图像数据类型转换为与目标图像相同的数据类型
-            # dark_data = dark_image.astype(target_dtype)
-            # # 偏置场校准
-            # bias_image = dark_data - target_data
-            # bias_image[bias_image < 0] = 0  # 确保不会出现负值
-            # # 将校准后的图像数据类型转换为与目标图像相同的数据类型
-            # bias_data = bias_image.astype(target_dtype)
-
-            # 确保 aligned_data 是 uint8 类型
+            # 平场校准
+            # 暗场校准
+            dark_data = calibrate.dark_calibration_data(aligned_data, dark_fits)
+            # 偏置场校准
+            bias_data = calibrate.dark_calibration_data(dark_data, bias_fits)
 
             # 直方图均值拉伸
-            equalized_image = cv2.equalizeHist(aligned_data)
+            equalized_image = cv2.equalizeHist(bias_data)
 
             # 将处理好的图像输入到 list 中
             stacked_data_list.append(equalized_image)
