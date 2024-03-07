@@ -64,10 +64,21 @@ def align_and_save(target_file_path, input_folder_path, output_folder_path):
 
 
 # 叠加相关函数实现
-def stack_button(input_folder_path, output_folder_path):
-    stacked_data, header, data_type = meanstack.mean_stack(input_folder_path)
-    meanstack.save_fits(stacked_data, header, data_type, output_folder_path)
-    messagebox.showinfo("堆叠完成", "图像已成功堆叠并保存！")
+def stack_button(input_folder_path, output_folder_path, method_combobox):
+    # 获取method_combobox的值
+    selected_method = method_combobox.get()
+
+    # 检查selected_method的合法性
+    if selected_method not in ['mean_stack', 'median_stack', 'max_stack', 'min_stack', 'sum_stack']:
+        # 显示错误信息或采取其他适当的操作
+        messagebox.showerror("错误", "不支持的叠加方法")
+        return
+
+    # 调用stack_image函数时，将StringVar转换为字符串
+    meanstack.stack_image(input_folder_path.get(), output_folder_path.get(), method_combobox)
+
+    # 显示成功信息
+    messagebox.showinfo("图像已堆叠并保存", "图像已成功堆叠并保存")
 
 
 # 进行解拜尔序列相关实现
@@ -280,10 +291,17 @@ class ImageProcessingApp:
         # 创建一个新的窗口作为二级页面
         second_page_window = tk.Toplevel(self.root)
         second_page_window.title("叠加页面")
-        second_page_window.geometry("300x200+300+100")
+        second_page_window.geometry("400x200+200+100")
         self.setup_meanstck_page(second_page_window)
 
     def setup_meanstck_page(self, frame):
+        tk.Label(frame, text="选择叠加方法:").grid(row=0, column=0, padx=10, pady=10)
+
+        method_combobox = ttk.Combobox(frame,
+                                       values=['mean_stack', 'median_stack', 'max_stack', 'min_stack', 'sum_stack'])
+        method_combobox.grid(row=0, column=1, padx=10, pady=10)
+        method_combobox.current(0)
+
         browse_button = tk.StringVar()
         tk.Label(frame, text="输入文件夹:").grid(row=1, column=0)
         tk.Entry(frame, textvariable=browse_button, state='readonly').grid(row=1, column=1)
@@ -295,9 +313,9 @@ class ImageProcessingApp:
         tk.Button(frame, text="浏览", command=lambda: browse_output_folder(browse_output_button)).grid(row=2,
                                                                                                        column=2)
 
-        tk.Button(frame, text="均值堆叠并保存",
-                  command=lambda: stack_button(browse_button.get(), browse_output_button.get(),
-                                               )).grid(row=3, column=1)
+        tk.Button(frame, text="堆叠并保存",
+                  command=lambda: stack_button(browse_button, browse_output_button,
+                                               method_combobox, )).grid(row=3, column=1)
 
         # 添加返回按钮
         btn_back = tk.Button(frame, text="返回主页面", command=self.back_to_first_page)
@@ -429,8 +447,10 @@ class ImageProcessingApp:
         self.btn_goto_second_page = tk.Button(self.root, text="叠加功能", command=self.setup_meanstck_page_wrapper)
         self.btn_goto_second_page.pack(side='left', padx=20, pady=60)
 
-        self.btn_goto_second_page = tk.Button(self.root, text="一键彩色出图", command=self.setup_bayer_page_wrapper_color)
+        self.btn_goto_second_page = tk.Button(self.root, text="一键彩色出图",
+                                              command=self.setup_bayer_page_wrapper_color)
         self.btn_goto_second_page.pack(side='top', padx=20, pady=20)
 
-        self.btn_goto_second_page = tk.Button(self.root, text="一键黑白出图", command=self.setup_bayer_page_wrapper_black)
+        self.btn_goto_second_page = tk.Button(self.root, text="一键黑白出图",
+                                              command=self.setup_bayer_page_wrapper_black)
         self.btn_goto_second_page.pack(side='top', padx=20, pady=20)

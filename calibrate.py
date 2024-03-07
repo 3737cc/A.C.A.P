@@ -1,3 +1,4 @@
+import numpy as np
 from astropy.io import fits
 import os
 
@@ -12,31 +13,29 @@ def save_image(calibrated_data, filename, save_folder):
 
 
 def flat_calibration(input_folder, target_filename):
-    # 读取目标图像
-    target_data = fits.getdata(target_filename)
 
-    # 调整平场图像
-    scale_factor = 1  # 根据需要调整这个值
-    target_data = (target_data / 255.0) * scale_factor
+    flat_image = fits.getdata(target_filename)
+    # 获取目标图像的数据类型
+    target_dtype = flat_image.dtype
 
-    # 防止零除问题
-    smoothing_factor = 0.01  # 可以根据实际情况调整这个值
-    target_data += smoothing_factor
-    target_data[target_data == 0] = target_data[target_data != 0].min()
+    # 创建掩码
+    mask = np.ones(flat_image.shape)
+    # 如果没有提供掩码，则创建一个与原始图像形状相同的掩码，其中所有像素的值均为 1。
+    if mask is None:
+        mask = np.ones(flat_image.shape)
 
     # 遍历文件夹内所有fits文件
     for filename in os.listdir(input_folder):
         if filename.endswith(".fits"):
             # 加载当前文件
-            current_data = fits.getdata(os.path.join(input_folder, filename))
-            # 获取目标图像的数据类型
-            current_dtype = current_data.dtype
-            # 执行平场校准
-            calibrated_image = current_data / target_data
-            calibrated_image[calibrated_image < 0] = 0  # 确保不会出现负值
+            original_image = fits.getdata(os.path.join(input_folder, filename))
 
-            # 将校准后的图像数据类型转换为与目标图像相同的数据类型
-            calibrated_data = calibrated_image.astype(current_dtype)
+            # 将平场图像应用于原始图像。
+            calibrated_image = np.where(mask == 1, original_image / flat_image, )
+
+            # 裁剪校准后的图像。
+            calibrated_image = calibrated_image[:original_image.shape[0], :original_image.shape[1]]
+            calibrated_data = calibrated_image.astype(target_dtype)
 
             yield calibrated_data, filename
 
@@ -85,7 +84,6 @@ def bias_calibration(input_folder, target_filename):
             calibrated_data = calibrated_image.astype(target_dtype)
 
             yield calibrated_data, filename
-
 
 # # 使用示例
 # for calibrated_data, filename in dark_calibration(input_folder, target_filename, save_folder):

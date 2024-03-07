@@ -35,15 +35,6 @@ def save_all(aligned_data, filename, save_folder):
     print(f"Saved aligned image: {save_path}")
 
 
-# # 调用示例
-# target_filename = "target.fits"
-# input_folder = "input_folder"
-# save_folder = "save_folder"
-#
-# for aligned_data, filename in align_all(target_filename, input_folder):
-#     save_all(aligned_data, filename, save_folder)
-
-
 def process_fits_images(target_filename, input_folder, save_folder):
     # 加载目标FITS图像
     with fits.open(target_filename) as hdul_target:
