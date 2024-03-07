@@ -6,6 +6,7 @@ from astropy.io import fits
 
 import bayer
 import fits_processor
+import calibrate
 
 
 def color(input_folder: str, output_folder: str, flat_folder: str = None, dark_folder: str = None, bias_folder: str = None, target_folder: str = None):
@@ -48,11 +49,11 @@ def color(input_folder: str, output_folder: str, flat_folder: str = None, dark_f
             # 校准图像
             calibrated_image = current_data
             if flat_image is not None:
-                calibrated_image = fits_processor.flat_calibration(calibrated_image, flat_image)
+                calibrated_image = calibrate.flat_calibration_data(calibrated_image, flat_image)
             if dark_image is not None:
-                calibrated_image = fits_processor.dark_calibration(calibrated_image, dark_image)
+                calibrated_image = calibrate .dark_calibration_data(calibrated_image, dark_image)
             if bias_image is not None:
-                calibrated_image = fits_processor.bias_calibration(calibrated_image, bias_image)
+                calibrated_image = calibrate .bias_calibration_data(calibrated_image, bias_image)
 
             # 对齐图像
             if target_folder is not None:

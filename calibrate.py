@@ -13,7 +13,6 @@ def save_image(calibrated_data, filename, save_folder):
 
 
 def flat_calibration(input_folder, target_filename):
-
     flat_image = fits.getdata(target_filename)
     # 获取目标图像的数据类型
     target_dtype = flat_image.dtype
@@ -40,6 +39,26 @@ def flat_calibration(input_folder, target_filename):
             yield calibrated_data, filename
 
 
+def flat_calibration_data(calibrated_image, flat_image):
+    # 获取目标图像的数据类型
+    target_dtype = flat_image.dtype
+
+    # 创建掩码
+    mask = np.ones(flat_image.shape)
+    # 如果没有提供掩码，则创建一个与原始图像形状相同的掩码，其中所有像素的值均为 1。
+    if mask is None:
+        mask = np.ones(flat_image.shape)
+
+        # 将平场图像应用于原始图像。
+        calibrated_image = np.where(mask == 1, calibrated_image / flat_image, )
+
+        # 裁剪校准后的图像。
+        calibrated_image = calibrated_image[:calibrated_image.shape[0], :calibrated_image.shape[1]]
+        calibrated_data = calibrated_image.astype(target_dtype)
+
+        yield calibrated_data
+
+
 def dark_calibration(input_folder, target_filename):
     # 读取目标图像
     target_data = fits.getdata(target_filename)
@@ -63,6 +82,14 @@ def dark_calibration(input_folder, target_filename):
             yield calibrated_data, filename
 
 
+def dark_calibration_data(calibrated_image, dark_image):
+    target_dtype = dark_image.dtype
+    calibrated_image = calibrated_image - dark_image
+    calibrated_image[calibrated_image < 0] = 0  # 确保不会出现负值
+    calibrated_data = calibrated_image.astype(target_dtype)
+    yield calibrated_data
+
+
 def bias_calibration(input_folder, target_filename):
     # 读取目标图像
     target_data = fits.getdata(target_filename)
@@ -84,6 +111,14 @@ def bias_calibration(input_folder, target_filename):
             calibrated_data = calibrated_image.astype(target_dtype)
 
             yield calibrated_data, filename
+
+
+def bias_calibration_data(calibrated_image, bias_image):
+    target_dtype = bias_image.dtype
+    calibrated_image = calibrated_image - bias_image
+    calibrated_image[calibrated_image < 0] = 0  # 确保不会出现负值
+    calibrated_data = calibrated_image.astype(target_dtype)
+    yield calibrated_data
 
 # # 使用示例
 # for calibrated_data, filename in dark_calibration(input_folder, target_filename, save_folder):

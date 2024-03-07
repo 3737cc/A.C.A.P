@@ -86,3 +86,4 @@ def noise_image(input_folder_path, output_folder_path, method_combobox, kernel_s
 
     # 显示成功信息
     messagebox.showinfo("图像已降噪并保存", "图像已成功降噪并保存")
+
