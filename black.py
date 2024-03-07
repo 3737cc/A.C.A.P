@@ -57,7 +57,6 @@ def color_image(input_folder, output_folder, flat_fits, dark_fits, bias_fits, ta
     if stacked_data.dtype != np.uint8:
         img = stacked_data.astype(np.uint8)
 
-
     # 构造新的输出文件名
     existing_files = [file for file in os.listdir(output_folder) if file.startswith(base_filename)]
     num_existing_files = len(existing_files)
@@ -69,7 +68,6 @@ def color_image(input_folder, output_folder, flat_fits, dark_fits, bias_fits, ta
     # 保存图像
     save_fits_rgb(img, save_path)
     print(f"Saved black image: {save_path}")
-
 
 # if __name__ == "__main__":
 #     # 设定参数
