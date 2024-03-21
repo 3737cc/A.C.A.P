@@ -84,7 +84,7 @@ def stack_button(input_folder_path, output_folder_path, method_combobox):
 # 进行解拜尔序列相关实现
 def bayer_button(input_folder_path, output_folder_path, ):
     bayer.bayer_image(input_folder_path, output_folder_path)
-    messagebox.showinfo("一键出图完成", "图像已成功保存")
+    messagebox.showinfo("解拜尔序列完成", "图像已成功保存")
 
 
 # 自动一键式彩色出图
@@ -124,7 +124,7 @@ class ImageProcessingApp:
     def __init__(self, root):
         self.root = root
         self.root.title("图像处理应用")
-        root.geometry("520x150+700+100")
+        root.geometry("620x150+700+100")
 
         # 创建一级页面的按钮
         self.btn_goto_second_page = tk.Button(root, text="降噪功能", command=self.setup_noise_reduction_page_wrapper)
@@ -137,6 +137,9 @@ class ImageProcessingApp:
         self.btn_goto_second_page.pack(side='left', padx=20, pady=20)
 
         self.btn_goto_second_page = tk.Button(root, text="叠加功能", command=self.setup_meanstck_page_wrapper)
+        self.btn_goto_second_page.pack(side='left', padx=20, pady=20)
+
+        self.btn_goto_second_page = tk.Button(root, text="解拜尔", command=self.setup_bayer_page_wrapper)
         self.btn_goto_second_page.pack(side='left', padx=20, pady=20)
 
         self.btn_goto_second_page = tk.Button(root, text="一键彩色出图", command=self.setup_bayer_page_wrapper_color)
@@ -153,7 +156,7 @@ class ImageProcessingApp:
         # 创建一个新的窗口作为二级页面
         second_page_window = tk.Toplevel(self.root)
         second_page_window.title("降噪页面")
-        second_page_window.geometry("490x350+1320+600")
+        second_page_window.geometry("490x350+1390+600")
         self.setup_noise_reduction_page(second_page_window)
 
     def setup_noise_reduction_page(self, frame):
@@ -199,7 +202,7 @@ class ImageProcessingApp:
         # 创建一个新的窗口作为二级页面
         second_page_window = tk.Toplevel(self.root)
         second_page_window.title("校准页面")
-        second_page_window.geometry("500x400+1320+100")
+        second_page_window.geometry("500x400+1390+100")
         self.setup_calibrate_page(second_page_window)
 
     def setup_calibrate_page(self, frame):
@@ -316,6 +319,35 @@ class ImageProcessingApp:
         tk.Button(frame, text="堆叠并保存",
                   command=lambda: stack_button(browse_button, browse_output_button,
                                                method_combobox, )).grid(row=3, column=1)
+
+        # 添加返回按钮
+        btn_back = tk.Button(frame, text="返回主页面", command=self.back_to_first_page)
+        btn_back.grid(row=6, column=1, pady=20)
+
+    def setup_bayer_page_wrapper(self):
+        # 销毁一级页面组件
+        # self.destroy_current_page()
+        # 创建一个新的窗口作为二级页面
+        second_page_window = tk.Toplevel(self.root)
+        second_page_window.title("解拜尔")
+        second_page_window.geometry("400x200+200+700")
+        self.setup_bayer_page(second_page_window)
+
+    def setup_bayer_page(self, frame):
+        browse_button = tk.StringVar()
+        tk.Label(frame, text="输入文件夹:").grid(row=0, column=0)
+        tk.Entry(frame, textvariable=browse_button, state='readonly').grid(row=0, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_input_folder(browse_button)).grid(row=0, column=2)
+
+        browse_output_button = tk.StringVar()
+        tk.Label(frame, text="输出文件夹:").grid(row=1, column=0)
+        tk.Entry(frame, textvariable=browse_output_button, state='readonly').grid(row=1, column=1)
+        tk.Button(frame, text="浏览", command=lambda: browse_output_folder(browse_output_button)).grid(row=1,
+                                                                                                       column=2)
+
+        tk.Button(frame, text="解拜尔序列并保存",
+                  command=lambda: bayer_button(browse_button, browse_output_button
+                                               , )).grid(row=3, column=1)
 
         # 添加返回按钮
         btn_back = tk.Button(frame, text="返回主页面", command=self.back_to_first_page)
@@ -446,6 +478,9 @@ class ImageProcessingApp:
 
         self.btn_goto_second_page = tk.Button(self.root, text="叠加功能", command=self.setup_meanstck_page_wrapper)
         self.btn_goto_second_page.pack(side='left', padx=20, pady=60)
+
+        self.btn_goto_second_page = tk.Button(self.root, text="解拜尔", command=self.setup_bayer_page_wrapper)
+        self.btn_goto_second_page.pack(side='left', padx=20, pady=20)
 
         self.btn_goto_second_page = tk.Button(self.root, text="一键彩色出图",
                                               command=self.setup_bayer_page_wrapper_color)
