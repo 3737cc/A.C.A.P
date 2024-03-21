@@ -9,7 +9,7 @@ import fits_processor
 import calibrate
 
 
-def color(input_folder: str, output_folder: str, flat_folder: str = None, dark_folder: str = None, bias_folder: str = None, target_folder: str = None):
+def color_image(input_folder: str, output_folder: str, flat_folder: str = None, dark_folder: str = None, bias_folder: str = None, target_folder: str = None):
     """一键式彩色出图。
 
     此函数将输入文件夹中的所有 FITS 文件对齐、校准、解拜耳化并保存为彩色图像。

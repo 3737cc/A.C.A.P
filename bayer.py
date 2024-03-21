@@ -28,7 +28,6 @@ def save_fits_rgb(rgb_data, fits_file_path):
 def bayer_image(input_folder, output_folder, base_filename='Bayer'):
     # 替换为你的FITS文件路径
     fits_file_path = input_folder
-
     # 读取FITS文件数据
     fits_data = read_fits(fits_file_path)
 
@@ -47,6 +46,27 @@ def bayer_image(input_folder, output_folder, base_filename='Bayer'):
     # 将RGB图像数据转换为FITS所需的格式
     fits_rgb_data = np.transpose(bayer_result, (2, 0, 1))
     return fits_rgb_data, save_fits_path
+
+
+def bayer_images(input_folder, save_folder):
+    print(type(input_folder), type(save_folder))
+    for filename in os.listdir(input_folder):
+        if filename.endswith(".fits"):
+            input_file_path = os.path.join(input_folder, filename)
+
+            with fits.open(input_file_path) as hdul_input:
+                image_input = hdul_input[0].data
+                # 直方图均值拉伸
+                equalized_image = cv2.equalizeHist(image_input.astype(np.uint8))
+
+                # 应用拜尔序列
+                bayer_result = bayer_sequence(equalized_image)
+
+                # 将RGB图像数据转换为FITS所需的格式
+                fits_rgb_data = np.transpose(bayer_result, (2, 0, 1))
+                # 保存结果
+                save_path = os.path.join(save_folder, f"bayer_{filename}")
+                fits.writeto(save_path, fits_rgb_data, overwrite=True)
 
 
 # if __name__ == '__main__':

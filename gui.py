@@ -87,6 +87,11 @@ def bayer_button(input_folder_path, output_folder_path, ):
     messagebox.showinfo("解拜尔序列完成", "图像已成功保存")
 
 
+def bayer_images_button(input_folder_path, output_folder_path):
+    bayer.bayer_images(input_folder_path.get(), output_folder_path.get())
+    messagebox.showinfo("解拜尔序列完成", "图像已成功保存")
+
+
 # 自动一键式彩色出图
 
 def automatic_color_button(input_folder, output_folder, flat_folder, dark_folder, bias_folder, target_folder):
@@ -346,8 +351,8 @@ class ImageProcessingApp:
                                                                                                        column=2)
 
         tk.Button(frame, text="解拜尔序列并保存",
-                  command=lambda: bayer_button(browse_button, browse_output_button
-                                               , )).grid(row=3, column=1)
+                  command=lambda: bayer_images_button(browse_button, browse_output_button
+                                                      , )).grid(row=3, column=1)
 
         # 添加返回按钮
         btn_back = tk.Button(frame, text="返回主页面", command=self.back_to_first_page)
