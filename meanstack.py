@@ -3,6 +3,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 from astropy.io import fits
+import dask.array as da
+import dask
 
 
 def mean_stack_worker(args):
@@ -51,16 +53,19 @@ def mean_stack(input_folder):
     with fits.open(fits_files[0]) as hdul:
         header = hdul[0].header
         data_type = hdul[0].data.dtype  # 获取数据类型
+        shape = hdul[0].data.shape  # 获取数据形状
 
-    # 使用ThreadPoolExecutor并行加载FITS文件
-    with ThreadPoolExecutor() as executor:
-        # 提交任务，每个任务加载一个FITS文件
-        tasks = [(fits_file, data_type) for fits_file in fits_files]
-        stacked_data_list = list(executor.map(mean_stack_worker, tasks))
+    chunk_size = 10  # 每次处理10个文件
+    results = []
+    for i in range(0, len(fits_files), chunk_size):
+        chunk_files = fits_files[i:i + chunk_size]
+        fits_arrays = [da.from_delayed(dask.delayed(fits.getdata)(f, header=False),
+                                       shape=shape, dtype=data_type)
+                       for f in chunk_files]
+        chunk_result = da.stack(fits_arrays, axis=0).mean(axis=0).compute()
+        results.append(chunk_result)
 
-    # 将加载的数据堆叠并计算均值
-    stacked_data = np.sum(stacked_data_list, axis=0) / len(fits_files)
-
+    stacked_data = np.mean(results, axis=0)
     return stacked_data, header, data_type
 
 

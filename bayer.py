@@ -14,7 +14,7 @@ def read_fits(file_path):
 
 def bayer_sequence(img):
     # 应用拜尔序列
-    bayer_img = cv2.cvtColor(img, cv2.COLOR_BayerBG2BGR)
+    bayer_img = cv2.cvtColor(img, cv2.COLOR_BayerGB2BGR)
     return cv2.cvtColor(bayer_img, cv2.COLOR_BGR2RGB)
 
 
